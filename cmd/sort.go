@@ -16,9 +16,29 @@ import (
 )
 
 var (
-	rootFolder = ""
+	destFolder = ""
 	inputFiles = []string{}
 )
+
+func isAllFiles(input []string) bool {
+	for i := range input {
+		if utils.IsDir(input[i]) {
+			return false
+		}
+	}
+	return true
+}
+func inSameDirectory(input []string) (dir string, err error) {
+	for i := range input {
+		_dir, _ := filepath.Split(input[i])
+		if len(dir) != 0 && dir != _dir {
+			return dir, errors.New("not in same directory")
+		} else {
+			dir = _dir
+		}
+	}
+	return dir, nil
+}
 
 // sortCmd represents the sort command
 var sortCmd = &cobra.Command{
@@ -26,62 +46,57 @@ var sortCmd = &cobra.Command{
 	Short: "sort files into category",
 	Long:  `sort files into category`,
 	Run: func(cmd *cobra.Command, args []string) {
+		var items []string
 		if len(args) == 0 {
 			cmd.Help()
 			return
 		}
-		if len(args) > 1 {
+		if len(inputFiles) == 0 { // user give inputFiles
+			if isAllFiles(inputFiles) {
+				items = inputFiles
+				if len(destFolder) == 0 {
+					fmt.Println("Dest folder can not be empty")
+					cmd.Help()
+					return
+				}
+			}
+		} else if len(args) > 1 { // use args as inputFiles
 			inputFiles = args
-		}
-		if len(inputFiles) != 0 {
-
-			if len(rootFolder) == 0 {
-				fmt.Println("root folder can not be empty")
-				cmd.Usage()
+			if isAllFiles(inputFiles) {
+				items = inputFiles
+				if len(destFolder) == 0 {
+					directory, err := inSameDirectory(inputFiles)
+					if err != nil {
+						fmt.Println("Dest folder can not be empty")
+						cmd.Help()
+						return
+					}
+					destFolder = directory
+				}
+			}
+			items = inputFiles
+		} else { // user input single folder
+			destFolder = args[0]
+			if !utils.IsDir(destFolder) {
+				fmt.Println(destFolder, "Is Not A Directory")
+			}
+			// 获取目录下的所有子项（文件和目录）
+			entries, err := os.ReadDir(args[0])
+			if err != nil {
+				fmt.Println("Error:", err)
 				return
 			}
-			// 遍历子项
-			for _, path := range inputFiles {
-				if utils.IsDir(path) {
-					// 忽略子目录
-					continue
-				}
-				if utils.Contains(Ignores, filepath.Base(path)) {
-					continue
-				}
-				err := sortFile(filepath.Join(args[0], path))
-				if err != nil {
-					if os.IsExist(err) {
-						fmt.Printf("File exist %v", err)
-					} else if os.IsPermission(err) {
-						fmt.Printf("permission denied %v", err)
-					} else {
-						fmt.Printf("%v", err)
-					}
-				}
+			for i := range entries {
+				items = append(items, entries[i].Name())
 			}
-			return
-		}
-		if len(rootFolder) == 0 {
-			rootFolder = args[0]
-		}
-		// 获取目录下的所有子项（文件和目录）
-		items, err := os.ReadDir(args[0])
-		if err != nil {
-			fmt.Println("Error:", err)
-			return
 		}
 
 		// 遍历子项
 		for _, item := range items {
-			if item.IsDir() {
-				// 忽略子目录
+			if utils.IsDir(item) || utils.Contains(Ignores, filepath.Base(item)) {
 				continue
 			}
-			if utils.Contains(Ignores, item.Name()) {
-				continue
-			}
-			err := sortFile(filepath.Join(args[0], item.Name()))
+			err := sortFile(item, destFolder)
 			if err != nil {
 				if os.IsExist(err) {
 					fmt.Printf("File exist %v\n", err)
@@ -101,11 +116,11 @@ func init() {
   gotool sort path/to/your/dir -D path/destination
   gotool sort --files file1 file2 file3 -D path/destination`
 	sortCmd.Flags().StringArrayVarP(&inputFiles, "files", "F", []string{}, "input files")
-	sortCmd.Flags().StringVarP(&rootFolder, "dest", "D", "", "sort dest")
+	sortCmd.Flags().StringVarP(&destFolder, "dest", "D", "", "sort dest")
 }
 
-func sortFile(path string) error {
-	historyFile, err := os.OpenFile(filepath.Join(rootFolder, "sort_history"), os.O_CREATE|os.O_APPEND, 777)
+func sortFile(path string, folder string) error {
+	historyFile, err := os.OpenFile(filepath.Join(folder, "sort_history"), os.O_CREATE|os.O_APPEND, 777)
 	if err != nil {
 		return err
 	}
@@ -122,13 +137,13 @@ func sortFile(path string) error {
 		return nil
 	}
 
-	if !utils.IsExist(filepath.Join(rootFolder, dir)) {
-		err := os.MkdirAll(filepath.Join(rootFolder, dir), 777)
+	if !utils.IsExist(filepath.Join(folder, dir)) {
+		err := os.MkdirAll(filepath.Join(folder, dir), 777)
 		if err != nil {
 			return err
 		}
 	}
-	err = os.Rename(path, filepath.Join(rootFolder, dir, filepath.Base(path)))
+	err = os.Rename(path, filepath.Join(folder, dir, filepath.Base(path)))
 	if err != nil {
 		return err
 
