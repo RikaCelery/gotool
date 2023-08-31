@@ -16,3 +16,12 @@ func IsExist(path string) bool {
 	}
 	return true
 }
+
+func CheckFiles(files []string) (invalids []string) {
+	for _, file := range files {
+		if !IsExist(file) {
+			invalids = append(invalids, file)
+		}
+	}
+	return invalids
+}

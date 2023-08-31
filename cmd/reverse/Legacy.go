@@ -24,6 +24,7 @@ import (
 	"golang.org/x/sys/windows"
 	"golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/transform"
+	"gotool/utils"
 )
 
 // Marquee returns marquee decorator that will scroll text right to left.
@@ -44,12 +45,12 @@ func Marquee(t string, ws int, divider string, wcc ...decor.WC) decor.Decorator 
 		var msg string
 
 		if count-ws > length {
-			msg = TruncateLeft(Truncate(text, count+ws), ws)
+			msg = utils.TruncateLeft(utils.Truncate(text, count+ws), ws)
 		} else {
-			msg = TruncateLeft(Truncate(text, count+ws), count)
+			msg = utils.TruncateLeft(utils.Truncate(text, count+ws), count)
 		}
 		if count+ws > length {
-			msg += Truncate(text, count+ws-length)
+			msg += utils.Truncate(text, count+ws-length)
 		}
 		count++
 		if count+ws >= len(t)+len(divider)-1 {
@@ -59,13 +60,6 @@ func Marquee(t string, ws int, divider string, wcc ...decor.WC) decor.Decorator 
 
 	}
 	return decor.Any(f, wcc...)
-}
-
-func Truncate(s string, size int) string {
-	return runewidth.Truncate(s, size, "")
-}
-func TruncateLeft(s string, size int) string {
-	return runewidth.TruncateLeft(s, size, "")
 }
 
 var cyan, green, red, yellow = color.New(color.FgHiCyan), color.New(color.FgGreen), color.New(color.FgHiRed), color.New(color.FgHiYellow)
@@ -89,7 +83,7 @@ func main() {
 		return
 	}
 	// make sure all files exist
-	if invalids := checkFiles(files); len(invalids) != 0 {
+	if invalids := utils.CheckFiles(files); len(invalids) != 0 {
 		fmt.Printf("files invalid:\n%v\n", strings.Join(invalids, "\n"))
 		return
 	}
@@ -113,20 +107,10 @@ func main() {
 	fmt.Println("everything done, time cost", (time.Now().UnixMilli()-startTime)/1000, "s")
 }
 
-func checkFiles(files []string) (invalids []string) {
-	for _, file := range files {
-		if !isExist(file) {
-			invalids = append(invalids, file)
-
-		}
-	}
-	return invalids
-}
-
 const (
 	DEBUG           = false
-	BUFFER_SIZE     = 1024 * 1024 * 10
-	OUT_BUFFER_SIZE = 1024 * 1024 * 10
+	BUFFER_SIZE     = 1024 * 1024 * 5
+	OUT_BUFFER_SIZE = 1024 * 1024 * 5
 )
 
 var MagicBytes = []byte{0x7c, 0xc2, 0x32, 0x00, 0xff}
@@ -241,18 +225,6 @@ func (d *MetaData) WriteMeta(file *os.File) error {
 	return nil
 }
 
-func isExist(path string) bool {
-	_, err := os.Stat(path)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return false
-		} else {
-			panic(err)
-		}
-	}
-	return true
-}
-
 func removeExtension(filename string) string {
 	ext := filepath.Ext(filename)
 	return filename[:len(filename)-len(ext)]
@@ -276,7 +248,7 @@ func encode(inputFileName string, bit int, base int, keepName bool, overwrite bo
 	println("======>", outputFileName)
 
 	info, _ := inputFile.Stat()
-	if isExist(outputFileName) {
+	if utils.IsExist(outputFileName) {
 		stat, _ := os.Stat(outputFileName)
 		if !overwrite && stat.Size() == info.Size()+558 {
 			fmt.Printf("\texist, skip(optput:%v,original:%v/diff:%v)\n", stat.Size(), info.Size(), stat.Size()-info.Size())
@@ -366,7 +338,7 @@ func decode(inputFileName string, bit int, base int, keepName bool, overwrite bo
 
 	}
 	fmt.Println("+------------>>", outputFileName)
-	if isExist(outputFileName) {
+	if utils.IsExist(outputFileName) {
 		output, _ := os.Stat(outputFileName)
 		if !overwrite && (output.Size() == inputInfo.Size()-byteOffset || output.Size() == inputInfo.Size()) {
 			yellow.Printf("\texist, skip(output:%v,original:%v/diff:%v)\n", output.Size(), inputInfo.Size(), output.Size()-inputInfo.Size())
