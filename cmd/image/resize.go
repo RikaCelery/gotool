@@ -19,8 +19,14 @@ var resizeCmd = &cobra.Command{
 	Short: "A brief description of your command",
 	Long:  `set height or width to 0 will keep aspect`,
 	Run: func(cmd *cobra.Command, args []string) {
+		if !cmd.Flag("input").Changed {
+			fmt.Printf("input not specified\n")
+			cmd.Usage()
+			return
+		}
 		if !cmd.Flag("output").Changed {
-			fmt.Printf("no output")
+			println("output not specified")
+			cmd.Usage()
 			return
 		}
 		img, err := readImage(cmd)
