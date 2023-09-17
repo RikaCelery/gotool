@@ -76,6 +76,8 @@ func init() {
 	imageCmd.AddCommand(resizeCmd)
 	resizeCmd.Flags().IntVarP(&width, "width", "w", 0, "output width")
 	resizeCmd.Flags().IntVarP(&height, "height", "h", 0, "output height")
+	resizeCmd.Flags().IntVarP(&width, "width", "W", 0, "output width")
+	resizeCmd.Flags().IntVarP(&height, "height", "H", 0, "output height")
 	resizeCmd.Flags().StringVarP(&format, "format", "f", "jpg", "output format (default: jpg)")
-	resizeCmd.Flags().StringVarP(&algorithm, "algorithm", "alg", "Lanczos3", "algorithm support:\n\t// Nearest-neighbor interpolation\n\tNearestNeighbor InterpolationFunction = iota\n\t// Bilinear interpolation\n\tBilinear\n\t// Bicubic interpolation (with cubic hermite spline)\n\tBicubic\n\t// Mitchell-Netravali interpolation\n\tMitchellNetravali\n\t// Lanczos interpolation (a=2)\n\tLanczos2\n\t// Lanczos interpolation (a=3)\n\tLanczos3 (default)")
+	resizeCmd.Flags().StringVarP(&algorithm, "algorithm", "g", "Lanczos3", "algorithm support:\n\t// Nearest-neighbor interpolation\n\tNearestNeighbor InterpolationFunction = iota\n\t// Bilinear interpolation\n\tBilinear\n\t// Bicubic interpolation (with cubic hermite spline)\n\tBicubic\n\t// Mitchell-Netravali interpolation\n\tMitchellNetravali\n\t// Lanczos interpolation (a=2)\n\tLanczos2\n\t// Lanczos interpolation (a=3)\n\tLanczos3 (default)")
 }
