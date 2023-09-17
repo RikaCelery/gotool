@@ -51,16 +51,7 @@ var sortCmd = &cobra.Command{
 			cmd.Help()
 			return
 		}
-		if len(inputFiles) == 0 { // user give inputFiles
-			if isAllFiles(inputFiles) {
-				items = inputFiles
-				if len(destFolder) == 0 {
-					fmt.Println("Dest folder can not be empty")
-					cmd.Help()
-					return
-				}
-			}
-		} else if len(args) > 1 { // use args as inputFiles
+		if len(args) > 1 { // use args as inputFiles
 			inputFiles = args
 			if isAllFiles(inputFiles) {
 				items = inputFiles
@@ -75,20 +66,33 @@ var sortCmd = &cobra.Command{
 				}
 			}
 			items = inputFiles
-		} else { // user input single folder
+		} else if len(args) == 1 { // user input single folder
 			destFolder = args[0]
 			if !utils.IsDir(destFolder) {
 				fmt.Println(destFolder, "Is Not A Directory")
 			}
 			// 获取目录下的所有子项（文件和目录）
-			entries, err := os.ReadDir(args[0])
+			entries, err := os.ReadDir(destFolder)
 			if err != nil {
 				fmt.Println("Error:", err)
 				return
 			}
 			for i := range entries {
-				items = append(items, entries[i].Name())
+				join := filepath.Join(destFolder, entries[i].Name())
+				items = append(items, join)
 			}
+		} else if len(inputFiles) == 0 { // user give inputFiles
+			if isAllFiles(inputFiles) {
+				items = inputFiles
+				if len(destFolder) == 0 {
+					fmt.Println("Dest folder can not be empty")
+					cmd.Help()
+					return
+				}
+			}
+		} else {
+			cmd.Help()
+			return
 		}
 
 		// 遍历子项
@@ -120,7 +124,7 @@ func init() {
 }
 
 func sortFile(path string, folder string) error {
-	historyFile, err := os.OpenFile(filepath.Join(folder, "sort_history"), os.O_CREATE|os.O_APPEND, 777)
+	historyFile, err := os.OpenFile(filepath.Join(folder, "sort_history"), os.O_CREATE|os.O_APPEND, 0644)
 	if err != nil {
 		return err
 	}
@@ -146,7 +150,6 @@ func sortFile(path string, folder string) error {
 	err = os.Rename(path, filepath.Join(folder, dir, filepath.Base(path)))
 	if err != nil {
 		return err
-
 	}
 	fmt.Printf("%s >> %s\n", path, dir)
 	_, err = historyFile.WriteString(fmt.Sprintf("%s >> %s\n", path, dir))
@@ -156,32 +159,32 @@ func sortFile(path string, folder string) error {
 	return nil
 }
 func getDestDir(path string) (string, error) {
-	if anyMatch(Music, path) {
-		return "Music", nil
+	if anyMatch(Musics, path) {
+		return "Musics", nil
 	}
-	if anyMatch(Video, path) {
-		return "Video", nil
+	if anyMatch(Videos, path) {
+		return "Videos", nil
 	}
-	if anyMatch(Document, path) {
-		return "Document", nil
+	if anyMatch(Documents, path) {
+		return "Documents", nil
 	}
-	if anyMatch(Archive, path) {
-		return "Archive", nil
+	if anyMatch(Archives, path) {
+		return "Archives", nil
 	}
-	if anyMatch(Book, path) {
-		return "Book", nil
+	if anyMatch(Books, path) {
+		return "Books", nil
 	}
-	if anyMatch(Code, path) {
-		return "Code", nil
+	if anyMatch(Codes, path) {
+		return "Codes", nil
 	}
-	if anyMatch(Photo, path) {
-		return "Photo", nil
+	if anyMatch(Photos, path) {
+		return "Photos", nil
 	}
-	if anyMatch(Video, path) {
-		return "Video", nil
+	if anyMatch(Videos, path) {
+		return "Videos", nil
 	}
-	if anyMatch(Program, path) {
-		return "Program", nil
+	if anyMatch(Programs, path) {
+		return "Programs", nil
 	}
 	if anyMatch(AdobeScripts, path) {
 		return "Adobe Scripts", nil
@@ -204,20 +207,20 @@ var Ignores = []string{
 	"Document",
 }
 
-var Music = extMatches([]string{"mp3", "m4a", "mp2", "flac", "wav", "WAV"})
-var Video = extMatches([]string{"mp4", "mov", "flv"})
-var Document = extMatches([]string{"txt", "pdf", "ppt", "pptx", "doc", "docx", "xls", "xlsx", "mhtml", "ini", "json", "xml"})
-var Photo = extMatches([]string{"jpg", "png", "tif"})
-var Archive = append(extMatches([]string{"zip", "7z", "rar", "gz", "xz"}),
+var Musics = extMatches([]string{"mp3", "m4a", "mp2", "flac", "wav", "WAV", "aac"})
+var Videos = extMatches([]string{"mp4", "mov", "flv", "mkv", "webm"})
+var Documents = extMatches([]string{"txt", "pdf", "ppt", "pptx", "doc", "docx", "xls", "xlsx", "mhtml", "ini", "json", "xml", "pz"})
+var Photos = extMatches([]string{"jpg", "jpeg", "png", "tif", "svg", "webp"})
+var Archives = append(extMatches([]string{"zip", "7z", "rar", "gz", "xz"}),
 	&RegexMatch{regex: regexp.MustCompile(`.+\.7z\.\d+$`)},
 	&RegexMatch{regex: regexp.MustCompile(`.+\.zip\.\d+$`)},
 	&RegexMatch{regex: regexp.MustCompile(`.+\.rar\.\d+$`)},
 	&RegexMatch{regex: regexp.MustCompile(`.+\.gz\.\d+$`)},
 	&RegexMatch{regex: regexp.MustCompile(`.+\.xz\.\d+$`)},
 )
-var Book = extMatches([]string{"epub", "mobi", "azw3", "azw2"})
-var Code = extMatches([]string{"c", "cpp", "java", "js", "kts", "py", "sql", "html", "htm"})
-var Program = extMatches([]string{"exe", "msi", "jar"})
+var Books = extMatches([]string{"epub", "mobi", "azw3", "azw2"})
+var Codes = extMatches([]string{"c", "cpp", "java", "js", "kts", "py", "sql", "html", "htm"})
+var Programs = extMatches([]string{"exe", "EXE", "msi", "jar"})
 var AdobeScripts = extMatches([]string{"jsxbin"})
 
 type Match interface {
