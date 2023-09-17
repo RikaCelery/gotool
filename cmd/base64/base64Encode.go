@@ -105,7 +105,7 @@ var base64EncodeCmd = &cobra.Command{
 			return
 		}
 		if cmd.Flag(flagOutputFile).Changed {
-			file, err := os.OpenFile(cmd.Flag(flagOutputFile).Value.String(), os.O_RDONLY, 777)
+			file, err := os.OpenFile(cmd.Flag(flagOutputFile).Value.String(), os.O_WRONLY|os.O_CREATE, 777)
 			if err != nil {
 				log.Fatalln(err)
 				return
