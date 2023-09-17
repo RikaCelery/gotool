@@ -320,7 +320,7 @@ func decode(inputFileName string, bit int, base int, keepName bool, overwrite bo
 	tempFileName := outputFileName + ".tmp"
 	// fmt.Printf("| tmp:%v\n", tempFileName)
 	fmt.Printf("| bit:%v\n", bit)
-	fmt.Printf("| fileName:%v\n", fileName)
+	fmt.Printf("| name:%v\n", fileName)
 	if legacy {
 		fmt.Printf("| [legacy mode]\n")
 		byteOffset = 0
