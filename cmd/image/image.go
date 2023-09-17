@@ -4,7 +4,6 @@ Copyright © 2023 NAME HERE <EMAIL ADDRESS>
 package image
 
 import (
-	"errors"
 	"image"
 	"os"
 
@@ -28,9 +27,6 @@ var (
 )
 
 func readImage(cmd *cobra.Command) (image.Image, error) {
-	if !cmd.Flag("input").Changed {
-		return nil, errors.New("no input")
-	}
 	inputFile := cmd.Flag("input").Value.String()
 	inputImage, err := os.Open(inputFile)
 	if err != nil {
@@ -46,7 +42,7 @@ func readImage(cmd *cobra.Command) (image.Image, error) {
 }
 func init() {
 	cmd.RootCmd.AddCommand(imageCmd)
-	imageCmd.Flags().StringVar(&InputFile, "input", "", "input image")
-	imageCmd.Flags().StringVar(&OutputFile, "output", "", "input image")
+	imageCmd.PersistentFlags().StringVarP(&InputFile, "input", "i", "", "input image")
+	imageCmd.PersistentFlags().StringVarP(&OutputFile, "output", "o", "", "input image")
 
 }
