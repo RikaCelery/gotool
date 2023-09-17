@@ -77,11 +77,11 @@ var width int
 var height int
 var format string
 var algorithm string
+var flagOnly bool
 
 func init() {
 	imageCmd.AddCommand(resizeCmd)
-	resizeCmd.Flags().IntVarP(&width, "width", "w", 0, "output width")
-	resizeCmd.Flags().IntVarP(&height, "height", "h", 0, "output height")
+	resizeCmd.Flags().BoolVarP(&flagOnly, "flag", "b", false, "only modify flag bytes")
 	resizeCmd.Flags().IntVarP(&width, "width", "W", 0, "output width")
 	resizeCmd.Flags().IntVarP(&height, "height", "H", 0, "output height")
 	resizeCmd.Flags().StringVarP(&format, "format", "f", "jpg", "output format (default: jpg)")
