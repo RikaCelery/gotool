@@ -22,6 +22,11 @@ var compressCmd = &cobra.Command{
 	Short: "image compressor",
 	Long:  `image compressor`,
 	Run: func(cmd *cobra.Command, args []string) {
+		if !cmd.Flag("input").Changed && !cmd.Flag("output").Changed {
+			fmt.Printf("input or output not specified\n")
+			cmd.Usage()
+			return
+		}
 		fmt.Printf("%v >> %v, quality:%v\n", InputFile, OutputFile, quality)
 
 		ext := filepath.Ext(InputFile)
