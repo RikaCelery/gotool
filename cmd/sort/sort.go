@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
+	"gotool/cmd"
 	"gotool/utils"
 )
 
@@ -115,7 +116,7 @@ var sortCmd = &cobra.Command{
 }
 
 func init() {
-	RootCmd.AddCommand(sortCmd)
+	cmd.RootCmd.AddCommand(sortCmd)
 	sortCmd.Example = `  gotool sort path/to/your/dir
   gotool sort path/to/your/dir -D path/destination
   gotool sort --files file1 file2 file3 -D path/destination`
