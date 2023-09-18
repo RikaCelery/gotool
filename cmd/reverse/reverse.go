@@ -13,7 +13,10 @@ import (
 	"io"
 	"math"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"runtime"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -23,7 +26,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/vbauerster/mpb/v8"
 	"github.com/vbauerster/mpb/v8/decor"
-	"golang.org/x/sys/windows"
 	"golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/transform"
 	"gotool/cmd"
@@ -379,20 +381,53 @@ type ProgressInfo struct {
 	Total     int64
 }
 
-func getTerminalWidth() (int, error) {
-	h, err := windows.GetStdHandle(windows.STD_OUTPUT_HANDLE)
-	if err != nil {
-		return 0, err
+// 获取终端窗口大小的函数
+func getTerminalSize() (width, height int, err error) {
+	switch runtime.GOOS {
+	case "windows":
+		cmd := exec.Command("cmd", "/c", "mode", "con")
+		cmd.Stdin = os.Stdin
+		cmd.Stderr = os.Stderr
+		out, err := cmd.Output()
+		if err != nil {
+			return 0, 0, err
+		}
+
+		lines := strings.Split(string(out), "\n")
+		if len(lines) >= 4 {
+			// 第三行包含宽度和高度信息，格式如：Columns: 80  Height: 24
+			columnsLine := strings.TrimSpace(lines[2])
+			heightLine := strings.TrimSpace(lines[3])
+
+			columnsParts := strings.Split(columnsLine, ":")
+			heightParts := strings.Split(heightLine, ":")
+
+			if len(columnsParts) == 2 && len(heightParts) == 2 {
+				width, _ = strconv.Atoi(strings.TrimSpace(columnsParts[1]))
+				height, _ = strconv.Atoi(strings.TrimSpace(heightParts[1]))
+				return width, height, nil
+			}
+		}
+	case "linux", "darwin":
+		cmd := exec.Command("stty", "size")
+		cmd.Stdin = os.Stdin
+		cmd.Stderr = os.Stderr
+		out, err := cmd.Output()
+		if err != nil {
+			return 0, 0, err
+		}
+
+		sizeParts := strings.Split(strings.TrimSpace(string(out)), " ")
+		if len(sizeParts) == 2 {
+			width, _ = strconv.Atoi(sizeParts[1])
+			height, _ = strconv.Atoi(sizeParts[0])
+			return width, height, nil
+		}
 	}
 
-	var csbi windows.ConsoleScreenBufferInfo
-	err = windows.GetConsoleScreenBufferInfo(h, &csbi)
-	if err != nil {
-		return 0, err
-	}
-
-	return int(csbi.Window.Right - csbi.Window.Left + 1), nil
+	return 0, 0, fmt.Errorf("无法获取终端窗口大小")
 }
+
 func toMetaFunc(c *color.Color) func(string) string {
 	return func(s string) string {
 		return c.Sprint(s)
@@ -411,7 +446,7 @@ func progressRoutine(done <-chan struct{}, progressCh <-chan ProgressInfo, wg *s
 		mpb.WithRefreshRate(100*time.Millisecond),
 	)
 	var start = time.Now()
-	width, err := getTerminalWidth()
+	width, _, err := getTerminalSize()
 	width /= 5
 	if err != nil || width > 40 {
 		width = 40
