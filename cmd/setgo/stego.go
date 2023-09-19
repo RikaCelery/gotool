@@ -15,8 +15,8 @@ var stegoCmd = &cobra.Command{
 	Short: `Unicode Text Steganography Encoders/Decoders`,
 	Long:  `Unicode Text Steganography Encoders/Decoders`,
 	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Printf("[child commands]\n")
 		for _, command := range cmd.Commands() {
-			fmt.Printf("[child commands]\n")
 			fmt.Printf("  %s: %s\n", command.Use, command.Short)
 		}
 	},
