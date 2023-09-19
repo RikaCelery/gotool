@@ -45,7 +45,7 @@ var tagStegoCmd = &cobra.Command{
 			}
 		} else {
 			clean := decode(input)
-			if print_clean {
+			if printClean {
 				fmt.Printf("clean text: %s\n", clean)
 			}
 		}
@@ -58,7 +58,7 @@ func encode(input string, message string) string {
 	var appendIdx = 0
 	for _, i := range message {
 		encoded = append(encoded, fmt.Sprintf("%c", i+0xe0000))
-		// fmt.Printf("%c U+%04x\n", i, i+0xe0000)
+
 	}
 	for _, c := range input {
 		if fmt.Sprintf("%c", c) == " " {
@@ -86,10 +86,17 @@ func decode(input string) string {
 	for _, c := range input {
 		if !(c <= 0xe007f && c >= 0xe0000) {
 			cleanText += fmt.Sprintf("%c", c)
+			if all {
+				info := ""
+				if !(c >= 0 && c <= 127) {
+					info = " [NON-ASCII]"
+				}
+				fmt.Printf("%c <=> U+%04X%s\n", c, c, info)
+			}
 		} else {
 			fmt.Printf("%c", c-0xe0000)
 			if detail {
-				fmt.Printf(" <=> U+%04X\n", c)
+				fmt.Printf(" <=> U+%04X [TAG]\n", c)
 			}
 		}
 	}
@@ -101,7 +108,8 @@ var cover string
 var message string
 var tailTags bool
 var detail bool
-var print_clean bool
+var printClean bool
+var all bool
 
 func getInput(pathOrRaw string) (string, error) {
 	if utils.IsExist(pathOrRaw) {
@@ -121,6 +129,6 @@ func init() {
 	tagStegoCmd.Flags().StringP("output", "o", "", "output path")
 	tagStegoCmd.Flags().BoolVar(&tailTags, "tail_tags", false, "put all tags to tail of input")
 	tagStegoCmd.Flags().BoolVar(&detail, "detail", false, "show mapping info")
-	tagStegoCmd.Flags().BoolVar(&print_clean, "print_clean", false, "show clean text")
-
+	tagStegoCmd.Flags().BoolVar(&all, "all", false, "show all unicode code point")
+	tagStegoCmd.Flags().BoolVar(&printClean, "print_clean", false, "show clean text")
 }
