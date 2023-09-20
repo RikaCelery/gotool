@@ -127,5 +127,10 @@ func BitStringToBitList(bitString string) *BitList {
 	return bitList
 }
 func (bl *BitList) ToBytes() []byte {
-	return bl.data
+	data := bl.data
+	if bl.Length%8 != 0 {
+		b := bl.Length % 8
+		data[len(data)-1] >>= (8 - b)
+	}
+	return data
 }
