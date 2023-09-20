@@ -29,7 +29,7 @@ import (
 //   ...
 
 var (
-	filepathArg     = ""
+	// filepathArg     = ""
 	printAsJsonArg  = false
 	printLoggingArg = false
 )
@@ -61,7 +61,7 @@ var exifCmd = &cobra.Command{
 				}
 			}()
 
-			if filepathArg == "" {
+			if cmd.Flag("input").Value.String() == "" {
 				fmt.Printf("Please provide a file-path for an image.\n")
 				cmd.Flags().Usage()
 				os.Exit(1)
@@ -72,7 +72,7 @@ var exifCmd = &cobra.Command{
 				log.AddAdapter("console", cla)
 			}
 
-			f, err := os.Open(filepathArg)
+			f, err := os.Open(cmd.Flag("input").Value.String())
 			log.PanicIf(err)
 
 			data, err := ioutil.ReadAll(f)
@@ -170,7 +170,7 @@ var exifCmd = &cobra.Command{
 func init() {
 	imageCmd.AddCommand(exifCmd)
 
-	exifCmd.Flags().StringVarP(&filepathArg, "input", "i", "", "File-path of image")
+	// exifCmd.Flags().StringVarP(&filepathArg, "input", "i", "", "File-path of image")
 	exifCmd.Flags().BoolVar(&printAsJsonArg, "json", false, "Print JSON")
 	exifCmd.Flags().BoolVar(&printLoggingArg, "verbose", false, "Print logging")
 
