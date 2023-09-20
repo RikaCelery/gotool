@@ -24,12 +24,8 @@ var advancedCmd = &cobra.Command{
 			return
 		}
 		if cmd.Flag("message").Changed {
-			total := bitlist.NewBitList()
-			for _, i := range content {
-				total.Join(bitlist.BitStringToBitList(fmt.Sprintf("%07b", i)))
-				// fmt.Printf("%c %07b %d\n", i, i, i)
-			}
-			var final = _encode_advanced(total)
+
+			var final = _encode_advanced()
 			println(final)
 		} else {
 			println(_decode_advanced(inputText))
@@ -77,7 +73,12 @@ func _decode_advanced(s string) (final string) {
 	}
 	return final
 }
-func _encode_advanced(total *bitlist.BitList) (final string) {
+func _encode_advanced() (final string) {
+	total := bitlist.NewBitList()
+	for _, i := range content {
+		total.Join(bitlist.BitStringToBitList(fmt.Sprintf("%07b", i)))
+		// fmt.Printf("%c %07b %d\n", i, i, i)
+	}
 	index := 0
 	for _, char := range inputText {
 		if index >= total.Length {
