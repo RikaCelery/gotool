@@ -74,7 +74,7 @@ var exifCmd = &cobra.Command{
 
 			f, err := os.Open(cmd.Flag("input").Value.String())
 			log.PanicIf(err)
-
+			defer f.Close()
 			data, err := ioutil.ReadAll(f)
 			log.PanicIf(err)
 

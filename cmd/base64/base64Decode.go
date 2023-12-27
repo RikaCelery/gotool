@@ -55,6 +55,7 @@ var base64DecodeCmd = &cobra.Command{
 				log.Fatalln(err)
 				return
 			}
+			defer file.Close()
 			strBytes, _ := io.ReadAll(file)
 			inputString = string(strBytes)
 		} else if cmd.Flag(flagData).Changed {
@@ -99,6 +100,7 @@ var base64DecodeCmd = &cobra.Command{
 				log.Fatalln(err)
 				return
 			}
+			defer file.Close()
 			if cmd.Flag(flagHexOutput).Changed {
 				file.WriteString(hex2.EncodeToString(decodeResult))
 			} else {

@@ -17,6 +17,7 @@ var parseCmd = &cobra.Command{
 	Long:  `jpeg header blocks parser`,
 	Run: func(cmd *cobra.Command, args []string) {
 		file, _ := os.Open(cmd.Flag("input").Value.String())
+		defer file.Close()
 		// 读取 JPEG 文件的内容
 		fileInfo, _ := file.Stat()
 		fileSize := fileInfo.Size()

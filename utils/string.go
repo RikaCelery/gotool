@@ -17,10 +17,10 @@ func Contains(slice []string, item string) bool {
 	return false
 }
 
-func Truncate(s string, size int) string {
+func ATruncate(s string, size int) string {
 	return runewidth.Truncate(s, size, "")
 }
-func TruncateLeft(s string, size int) string {
+func ATruncateLeft(s string, size int) string {
 	return runewidth.TruncateLeft(s, size, "")
 }
 func SplitToUnicodeChars(s string) []string {

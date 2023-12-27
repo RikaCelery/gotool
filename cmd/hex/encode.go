@@ -26,22 +26,24 @@ var encodeCmd = &cobra.Command{
 		}
 		var input []byte
 		if len(args) == 0 {
-			file, err := os.OpenFile(cmd.Flag(inputFile).Value.String(), os.O_CREATE, 777)
+			file, err := os.Open(cmd.Flag(inputFile).Value.String())
 			if err != nil {
 				log.Fatalln(err)
 				return
 			}
+			defer file.Close()
 			input, _ = io.ReadAll(file)
 		} else {
 			input = []byte(args[0])
 		}
 
 		if cmd.Flag(outputFile).Changed {
-			file, err := os.OpenFile(cmd.Flag(outputFile).Value.String(), os.O_CREATE, 777)
+			file, err := os.OpenFile(cmd.Flag(outputFile).Value.String(), os.O_CREATE|os.O_WRONLY, 777)
 			if err != nil {
 				log.Fatalln(err)
 				return
 			}
+			defer file.Close()
 			if cmd.Flag(upperCase).Changed {
 				file.WriteString(strings.ToUpper(hex2.EncodeToString(input)))
 			} else {

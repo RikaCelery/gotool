@@ -56,8 +56,8 @@ func compressJPEG(q int, inputFile string, outputFile string) error {
 		fmt.Println("无法打开输入图片文件:", err)
 		os.Exit(1)
 	}
+	defer inputImage.Close()
 	img, _, err := image.Decode(inputImage)
-	inputImage.Close()
 	if err != nil {
 		return err
 	}

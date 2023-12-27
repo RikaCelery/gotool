@@ -25,11 +25,12 @@ var decodeCmd = &cobra.Command{
 		}
 		var input string
 		if len(args) == 0 {
-			file, err := os.OpenFile(cmd.Flag(inputFile).Value.String(), os.O_CREATE, 777)
+			file, err := os.Open(cmd.Flag(inputFile).Value.String())
 			if err != nil {
 				log.Fatalln(err)
 				return
 			}
+			defer file.Close()
 			all, err := io.ReadAll(file)
 			input = string(all)
 		} else {
@@ -37,11 +38,12 @@ var decodeCmd = &cobra.Command{
 		}
 
 		if cmd.Flag(outputFile).Changed {
-			file, err := os.OpenFile(cmd.Flag(outputFile).Value.String(), os.O_CREATE, 777)
+			file, err := os.OpenFile(cmd.Flag(outputFile).Value.String(), os.O_CREATE|os.O_WRONLY, 777)
 			if err != nil {
 				log.Fatalln(err)
 				return
 			}
+			defer file.Close()
 			decodeString, err := hex2.DecodeString(input)
 			if err != nil {
 				log.Fatalln(err)

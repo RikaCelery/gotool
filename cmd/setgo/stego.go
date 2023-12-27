@@ -24,5 +24,5 @@ var stegoCmd = &cobra.Command{
 
 func init() {
 	cmd.RootCmd.AddCommand(stegoCmd)
-
+	stegoCmd.AddCommand(moovStegoCmd)
 }

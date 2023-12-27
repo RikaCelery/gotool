@@ -80,6 +80,7 @@ func main() {
 			if err != nil {
 				return
 			}
+			defer file.Close()
 			outputFile = file
 		} else {
 			outputFile, err = os.Open(*outputFileName)
@@ -95,6 +96,7 @@ func main() {
 		hex:        *hexOut,
 		outputFile: outputFile,
 	}
+	defer outputFile.Close()
 	if isExist(input) {
 		bytes, _ := fileInput(input)
 		if utf8.Valid(bytes) && isBase64(string(bytes)) && !*encodeMode || *decodeMode {
@@ -132,6 +134,7 @@ func isBase64(input string) bool {
 
 func fileInput(s string) ([]byte, error) {
 	file, _ := os.Open(s)
+	defer file.Close()
 	bytes, err := io.ReadAll(file)
 	if err != nil {
 		return make([]byte, 0), errors.New("error")

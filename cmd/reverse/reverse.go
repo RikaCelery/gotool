@@ -225,6 +225,8 @@ func removeExtension(filename string) string {
 func encode(inputFileName string, bit int, base int, keepName bool, overwrite bool) {
 	println("encode:", inputFileName)
 	inputFile, _ := os.Open(inputFileName)
+	defer inputFile.Close()
+
 	var byteOffset int64 = 0
 
 	dir, fileName := filepath.Split(inputFileName)
@@ -263,6 +265,7 @@ func encode(inputFileName string, bit int, base int, keepName bool, overwrite bo
 		red.Println("[err decode] failed to open target inputFileName(", tempFileName, "),err=", err.Error())
 		return
 	}
+	tempFile.Close()
 	err = metaData.WriteMeta(tempFile)
 	if err != nil {
 		red.Printf("err%v\n", err.Error())
@@ -295,6 +298,7 @@ func decode(inputFileName string, bit int, base int, keepName bool, overwrite bo
 	fmt.Printf("+---decode---<< %v\n", inputFileName)
 
 	var inputFile, _ = os.Open(inputFileName)
+	defer inputFile.Close()
 	var byteOffset int64 = 558
 	meta, err := readMeta(inputFile)
 	inputInfo, _ := inputFile.Stat()
@@ -353,9 +357,9 @@ func decode(inputFileName string, bit int, base int, keepName bool, overwrite bo
 		red.Println("[err decode] failed to open target inputFileName(", tempFileName, "),err=", err.Error())
 		return
 	}
+	defer tempFile.Close()
 	err = reverseData(inputFile, inputInfo.Size()-byteOffset, bit, tempFile)
-	inputFile.Close()
-	tempFile.Close()
+
 	if err != nil {
 		red.Println("error!!", inputFileName+"[", err.Error(), "]")
 		_ = os.Remove(tempFileName)

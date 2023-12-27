@@ -34,6 +34,7 @@ B:𝗕𝘉𝘽𝙱𝚩
 			if cmd.Flag("output").Changed {
 				os.Remove(cmd.Flag("output").Value.String())
 				file, _ := os.OpenFile(cmd.Flag("output").Value.String(), os.O_WRONLY|os.O_CREATE, 755)
+				defer file.Close()
 				file.WriteString(final + tail)
 			}
 		} else {
