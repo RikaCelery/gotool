@@ -265,7 +265,6 @@ func encode(inputFileName string, bit int, base int, keepName bool, overwrite bo
 		red.Println("[err decode] failed to open target inputFileName(", tempFileName, "),err=", err.Error())
 		return
 	}
-	tempFile.Close()
 	err = metaData.WriteMeta(tempFile)
 	if err != nil {
 		red.Printf("err%v\n", err.Error())
