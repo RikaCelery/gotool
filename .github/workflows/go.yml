@@ -4,6 +4,10 @@
 name: Go
 
 on:
+  workflow_dispatch:
+    inputs:
+      doBuild:
+        description: 'Do Build'
   push:
     branches: [ "master" ]
   pull_request:
