@@ -351,7 +351,7 @@ func decode(inputFileName string, bit int, base int, keepName bool, overwrite bo
 	}
 
 	_ = os.Remove(tempFileName)
-	tempFile, err := os.OpenFile(tempFileName, os.O_WRONLY|os.O_CREATE, 755)
+	tempFile, err := os.OpenFile(tempFileName, os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {
 		red.Println("[err decode] failed to open target inputFileName(", tempFileName, "),err=", err.Error())
 		return
