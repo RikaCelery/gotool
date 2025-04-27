@@ -356,9 +356,8 @@ func decode(inputFileName string, bit int, base int, keepName bool, overwrite bo
 		red.Println("[err decode] failed to open target inputFileName(", tempFileName, "),err=", err.Error())
 		return
 	}
-	defer tempFile.Close()
 	err = reverseData(inputFile, inputInfo.Size()-byteOffset, bit, tempFile)
-
+	tempFile.Close()
 	if err != nil {
 		red.Println("error!!", inputFileName+"[", err.Error(), "]")
 		_ = os.Remove(tempFileName)
@@ -371,6 +370,7 @@ func decode(inputFileName string, bit int, base int, keepName bool, overwrite bo
 		}
 	}
 	if deleteOrigin {
+		inputFile.Close()
 		err := os.Remove(inputFile.Name())
 		if err != nil {
 			fmt.Printf("[error] file %v cannot be removed err=%v", inputFile.Name(), err)
